@@ -5,11 +5,13 @@
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
     { "type": "wokwi-ili9341", "id": "lcd", "top": -120, "left": 240, "attrs": {} },
-    { "type": "wokwi-ky-040", "id": "enc", "top": 20, "left": -230, "attrs": {} },
-    { "type": "wokwi-pushbutton", "id": "btnPrev", "top": 300, "left": -150, "attrs": { "color": "white", "label": "PREV" } },
-    { "type": "wokwi-pushbutton", "id": "btnPlay", "top": 300, "left": -50, "attrs": { "color": "green", "label": "PLAY" } },
-    { "type": "wokwi-pushbutton", "id": "btnNext", "top": 300, "left": 50, "attrs": { "color": "white", "label": "NEXT" } },
-    { "type": "wokwi-pushbutton", "id": "btnLike", "top": 300, "left": 150, "attrs": { "color": "red", "label": "LIKE" } }
+    { "type": "wokwi-pushbutton", "id": "btnUp", "top": 300, "left": 0, "attrs": { "color": "white", "label": "UP" } },
+    { "type": "wokwi-pushbutton", "id": "btnPrev", "top": 370, "left": -90, "attrs": { "color": "white", "label": "PREV" } },
+    { "type": "wokwi-pushbutton", "id": "btnPlay", "top": 370, "left": 0, "attrs": { "color": "green", "label": "PLAY" } },
+    { "type": "wokwi-pushbutton", "id": "btnNext", "top": 370, "left": 90, "attrs": { "color": "white", "label": "NEXT" } },
+    { "type": "wokwi-pushbutton", "id": "btnDown", "top": 440, "left": 0, "attrs": { "color": "white", "label": "DOWN" } },
+    { "type": "wokwi-pushbutton", "id": "btnSelect", "top": 330, "left": 210, "attrs": { "color": "blue", "label": "SELECT" } },
+    { "type": "wokwi-pushbutton", "id": "btnLike", "top": 410, "left": 210, "attrs": { "color": "red", "label": "LIKE" } }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
@@ -25,12 +27,12 @@
     [ "lcd:LED", "esp:3V3", "red", [] ],
     [ "lcd:MISO", "esp:19", "cyan", [] ],
 
-    [ "enc:CLK", "esp:32", "green", [] ],
-    [ "enc:DT", "esp:25", "blue", [] ],
-    [ "enc:SW", "esp:26", "orange", [] ],
-    [ "enc:VCC", "esp:3V3", "red", [] ],
-    [ "enc:GND", "esp:GND.1", "black", [] ],
-
+    [ "btnUp:1.l", "esp:32", "white", [] ],
+    [ "btnUp:2.l", "esp:GND.1", "black", [] ],
+    [ "btnDown:1.l", "esp:25", "white", [] ],
+    [ "btnDown:2.l", "esp:GND.1", "black", [] ],
+    [ "btnSelect:1.l", "esp:26", "blue", [] ],
+    [ "btnSelect:2.l", "esp:GND.3", "black", [] ],
     [ "btnPrev:1.l", "esp:4", "white", [] ],
     [ "btnPrev:2.l", "esp:GND.3", "black", [] ],
     [ "btnPlay:1.l", "esp:13", "green", [] ],

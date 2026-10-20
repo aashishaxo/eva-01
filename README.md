@@ -13,7 +13,7 @@ flowchart LR
     spotify[(Spotify)] -- audio stream --> cspot
     api[Spotify Web API] -- playlists, likes, search --> ui
     subgraph ESP32
-        ui[Screen, knob, buttons] -- play / skip / volume --> cspot[cspot<br/>Spotify Connect]
+        ui[Screen, buttons] -- play / skip / volume --> cspot[cspot<br/>Spotify Connect]
         cspot -- PCM audio --> a2dp[A2DP source]
     end
     a2dp -- Bluetooth --> buds((Earbuds))
@@ -48,8 +48,7 @@ Spotify only offers the right-hand column inside its own apps.
 |---|---|
 | ESP32 dev board | Must be an original ESP32. The S3, C3 and C6 have no Bluetooth Classic, so they can't send audio to earbuds. A **WROVER** module (with PSRAM) is needed for Spotify streaming. |
 | ILI9341 TFT, 2.4" or 2.8" | SPI, 240 × 320 |
-| KY-040 rotary encoder | Scrolling and volume |
-| 4 tactile buttons | Previous, play/pause, next, like |
+| 7 tactile buttons | Up, down, select, previous, play/pause, next, like |
 | Bluetooth earbuds | Any A2DP earbuds. Developed against Realme Buds. |
 | Spotify Premium | Required for Spotify Connect playback |
 
@@ -85,11 +84,10 @@ void loop() {}
 | | MOSI | 23 |
 | | SCK | 18 |
 | | MISO | 19 |
-| Encoder | CLK | 32 |
-| | DT | 25 |
-| | SW | 26 |
-| | + / GND | 3V3 / GND |
-| Buttons | PREV | 4 |
+| Buttons | UP | 32 |
+| | DOWN | 25 |
+| | SELECT | 26 |
+| | PREV | 4 |
 | | PLAY | 13 |
 | | NEXT | 14 |
 | | LIKE | 22 |
@@ -110,10 +108,18 @@ Spotify, so the songs are sample data and playback is a timer.
 3. Add a `libraries.txt` file with the same contents as the one here.
 4. Press play.
 
-| Input | Lists | Now Playing |
+The buttons sit in a cross, with PLAY in the middle:
+
+```
+           [ UP ]
+[ PREV ]  [ PLAY ]  [ NEXT ]       [ SELECT ]
+          [ DOWN ]                 [  LIKE  ]
+```
+
+| Button | Lists | Now Playing |
 |---|---|---|
-| Turn knob | Scroll | Volume |
-| Press knob | Open, play, or go back | Back to library |
+| UP, DOWN | Move through the list (hold to scroll) | Volume up / down |
+| SELECT | Open, play, or go back | Back to library |
 | PLAY | Play / pause | Play / pause |
 | PREV, NEXT | Previous / next track | Previous / next track |
 | LIKE | Like the current track | Like the current track |

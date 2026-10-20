@@ -11,7 +11,7 @@
 // Chosen to be safe on a WROVER board: avoids GPIO 6-11 (flash),
 // 16/17 (PSRAM), 12 (boot strapping) and 34-39 (no internal pull-ups).
 constexpr uint8_t TFT_CS = 5, TFT_DC = 27, TFT_RST = 33;  // SCK 18, MOSI 23, MISO 19
-constexpr uint8_t ENC_CLK = 32, ENC_DT = 25, ENC_SW = 26;
+constexpr uint8_t BTN_UP = 32, BTN_DOWN = 25, BTN_SELECT = 26;
 constexpr uint8_t BTN_PREV = 4, BTN_PLAY = 13, BTN_NEXT = 14, BTN_LIKE = 22;
 
 // Wokwi's simulated access point; put your own network here on real hardware.
@@ -58,9 +58,16 @@ Playlist playlists[] = {
 };
 
 // ---- Input ----
-struct Button { uint8_t pin; bool stable = HIGH; bool raw = HIGH; uint32_t changedAt = 0; };
+struct Button {
+  uint8_t pin;
+  bool stable = HIGH;
+  bool raw = HIGH;
+  uint32_t changedAt = 0;
+  uint32_t repeatAt = 0;
+};
 
-Button btnPrev{BTN_PREV}, btnPlay{BTN_PLAY}, btnNext{BTN_NEXT}, btnLike{BTN_LIKE}, encBtn{ENC_SW};
+Button btnUp{BTN_UP}, btnDown{BTN_DOWN}, btnSelect{BTN_SELECT};
+Button btnPrev{BTN_PREV}, btnPlay{BTN_PLAY}, btnNext{BTN_NEXT}, btnLike{BTN_LIKE};
 
 // True once per press, after the contact has settled for 25 ms.
 bool pressed(Button& b) {
@@ -74,14 +81,14 @@ bool pressed(Button& b) {
   return false;
 }
 
-// +1 clockwise, -1 counter-clockwise, 0 if the knob hasn't moved.
-int readEncoder() {
-  static int lastClk = HIGH;
-  int clk = digitalRead(ENC_CLK);
-  if (clk == lastClk) return 0;
-  lastClk = clk;
-  if (clk != LOW) return 0;
-  return digitalRead(ENC_DT) == HIGH ? 1 : -1;
+// Like pressed(), but keeps firing while held: after 400 ms, then every 120 ms.
+bool pressedOrHeld(Button& b) {
+  if (pressed(b)) { b.repeatAt = millis() + 400; return true; }
+  if (b.stable == LOW && (int32_t)(millis() - b.repeatAt) >= 0) {
+    b.repeatAt += 120;
+    return true;
+  }
+  return false;
 }
 
 // ---- State ----
@@ -94,7 +101,7 @@ int openPlaylist = 0;  // playlist shown on the Tracks screen
 int playingList = -1;  // -1 = nothing playing yet
 int playingTrack = 0;
 bool isPlaying = false;
-int volume = 60;       // 0-100; becomes the A2DP volume later
+int volume = 60;       // 0-100, in steps of 5; becomes the A2DP volume later
 uint32_t positionMs = 0, lastTick = 0;
 uint32_t drawnSec = UINT32_MAX;  // second last shown on the progress bar
 bool wifiUp = false;
@@ -213,7 +220,7 @@ void drawNowPlaying() {
   if (playingList < 0) {
     tft.setTextColor(C_DIM);
     printClipped("Nothing playing", 30, 140, 2, 18);
-    printClipped("Press knob for library", 54, 166, 1, 30);
+    printClipped("Press SELECT for library", 48, 166, 1, 30);
     return;
   }
   Track& t = currentTrack();
@@ -282,7 +289,7 @@ void onSelect() {
 
 void setup() {
   Serial.begin(115200);
-  for (uint8_t p : {ENC_CLK, ENC_DT, ENC_SW, BTN_PREV, BTN_PLAY, BTN_NEXT, BTN_LIKE}) {
+  for (uint8_t p : {BTN_UP, BTN_DOWN, BTN_SELECT, BTN_PREV, BTN_PLAY, BTN_NEXT, BTN_LIKE}) {
     pinMode(p, INPUT_PULLUP);
   }
   tft.begin();
@@ -301,16 +308,18 @@ void loop() {
     if (up) Serial.printf("Wi-Fi connected, IP %s\n", WiFi.localIP().toString().c_str());
   }
 
-  // Knob: scrolls lists, or sets volume on the Now Playing screen.
-  int step = readEncoder();
+  // UP/DOWN: move through lists, or set volume on the Now Playing screen.
+  int step = 0;
+  if (pressedOrHeld(btnUp)) step = -1;
+  if (pressedOrHeld(btnDown)) step = 1;
   if (step && screen == Screen::NowPlaying) {
-    volume = constrain(volume + step * 5, 0, 100);
+    volume = constrain(volume - step * 5, 0, 100);
     if (playingList >= 0) drawVolume();
   } else if (step) {
     cursor = constrain(cursor + step, 0, listCount() - 1);
     redraw = true;
   }
-  if (pressed(encBtn)) onSelect();
+  if (pressed(btnSelect)) onSelect();
 
   if (pressed(btnPlay) && playingList >= 0) {
     isPlaying = !isPlaying;
