@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "author": "Rubicon",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-ili9341", "id": "lcd", "top": -120, "left": 240, "attrs": {} },
+    { "type": "wokwi-ky-040", "id": "enc", "top": 20, "left": -230, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btnPrev", "top": 300, "left": -150, "attrs": { "color": "white", "label": "PREV" } },
+    { "type": "wokwi-pushbutton", "id": "btnPlay", "top": 300, "left": -50, "attrs": { "color": "green", "label": "PLAY" } },
+    { "type": "wokwi-pushbutton", "id": "btnNext", "top": 300, "left": 50, "attrs": { "color": "white", "label": "NEXT" } },
+    { "type": "wokwi-pushbutton", "id": "btnLike", "top": 300, "left": 150, "attrs": { "color": "red", "label": "LIKE" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "lcd:VCC", "esp:3V3", "red", [] ],
+    [ "lcd:GND", "esp:GND.2", "black", [] ],
+    [ "lcd:CS", "esp:5", "orange", [] ],
+    [ "lcd:RST", "esp:33", "purple", [] ],
+    [ "lcd:D/C", "esp:27", "yellow", [] ],
+    [ "lcd:MOSI", "esp:23", "blue", [] ],
+    [ "lcd:SCK", "esp:18", "green", [] ],
+    [ "lcd:LED", "esp:3V3", "red", [] ],
+    [ "lcd:MISO", "esp:19", "cyan", [] ],
+
+    [ "enc:CLK", "esp:32", "green", [] ],
+    [ "enc:DT", "esp:25", "blue", [] ],
+    [ "enc:SW", "esp:26", "orange", [] ],
+    [ "enc:VCC", "esp:3V3", "red", [] ],
+    [ "enc:GND", "esp:GND.1", "black", [] ],
+
+    [ "btnPrev:1.l", "esp:4", "white", [] ],
+    [ "btnPrev:2.l", "esp:GND.3", "black", [] ],
+    [ "btnPlay:1.l", "esp:13", "green", [] ],
+    [ "btnPlay:2.l", "esp:GND.3", "black", [] ],
+    [ "btnNext:1.l", "esp:14", "white", [] ],
+    [ "btnNext:2.l", "esp:GND.3", "black", [] ],
+    [ "btnLike:1.l", "esp:22", "red", [] ],
+    [ "btnLike:2.l", "esp:GND.3", "black", [] ]
+  ],
+  "dependencies": {}
+}
