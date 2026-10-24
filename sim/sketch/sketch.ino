@@ -1,4 +1,4 @@
-// Rubicon: wiring + UI simulation for Wokwi.
+// EVA-01: wiring + UI simulation for Wokwi.
 // Playback is faked with sample data. Spotify (cspot + Web API) and the
 // Bluetooth link to the earbuds (A2DP) come later, on real hardware.
 
@@ -128,7 +128,7 @@ void drawStatusBar() {
   tft.setTextSize(1);
   tft.setTextColor(C_ACCENT);
   tft.setCursor(6, 6);
-  tft.print("RUBICON");
+  tft.print("EVA-01");
   tft.setTextColor(wifiUp ? C_ACCENT : C_DIM);
   tft.setCursor(118, 6);
   tft.print(wifiUp ? "WiFi OK" : "WiFi...");
@@ -296,7 +296,7 @@ void setup() {
   tft.fillScreen(C_BG);
   drawStatusBar();
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  Serial.println("Rubicon sim started");
+  Serial.println("EVA-01 sim started");
   lastTick = millis();
 }
 

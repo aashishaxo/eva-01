@@ -1,10 +1,35 @@
-# Rubicon
+# EVA-01
 
-A pocket Spotify player built on an ESP32. It streams music over Wi-Fi without
-a phone and plays it through Bluetooth earbuds.
+A pocket Spotify player built on an ESP32. It streams music over Wi-Fi with no
+phone involved and plays it through Bluetooth earbuds.
 
 > **Status: early.** The wiring and interface run in a browser simulator with
 > sample data. Spotify streaming and Bluetooth audio come next, on real hardware.
+
+- [Try it in the simulator](#try-it-in-the-simulator)
+- [How it works](#how-it-works)
+- [What it can do](#what-it-can-do)
+- [Hardware](#hardware)
+- [Wiring](#wiring)
+- [Controls](#controls)
+- [Project layout](#project-layout)
+- [Roadmap](#roadmap)
+- [Caveats](#caveats)
+
+## Try it in the simulator
+
+You don't need any hardware. [`sim/sketch/`](sim/sketch) is a
+[Wokwi](https://wokwi.com) project with the full wiring below already done.
+Wokwi can't simulate Bluetooth audio or Spotify, so the songs are sample data
+and playback runs on a timer.
+
+1. Open <https://wokwi.com/projects/new/esp32>.
+2. Replace `sketch.ino` and `diagram.json` with the files from `sim/sketch/`.
+3. Add a `libraries.txt` file with the same contents as the one in `sim/sketch/`.
+4. Press play.
+
+The screen shows `EVA-01` in the status bar once it boots, and the Serial
+Monitor prints each play, pause and like.
 
 ## How it works
 
@@ -22,13 +47,13 @@ flowchart LR
 Two pieces do the work:
 
 - **[cspot](https://github.com/feelfreelinux/cspot)** turns the ESP32 into a
-  Spotify Connect device. It shows up in Spotify's device list, like a smart
-  speaker, and pulls audio straight from Spotify's servers.
+  Spotify Connect device. It shows up in Spotify's device list like a smart
+  speaker does, and pulls audio straight from Spotify's servers.
 - **The Spotify Web API** handles browsing: your playlists, Liked Songs, search,
-  the queue, liking the current song. It can also start playback *on the ESP32
-  itself*, so after a one-time login the phone isn't needed.
+  the queue, and liking the current song. It can also start playback *on the
+  ESP32 itself*, so after a one-time login you don't need the phone.
 
-The decoded audio goes out over Bluetooth Classic (A2DP) to the earbuds.
+The decoded audio goes out to the earbuds over Bluetooth Classic (A2DP).
 
 ## What it can do
 
@@ -40,17 +65,17 @@ The decoded audio goes out over Bluetooth Classic (A2DP) to the earbuds.
 | Queue, search, recently played | Offline downloads |
 | Album art on the screen | Listing Spotify-made playlists (Discover Weekly, Daily Mix) |
 
-Spotify only offers the right-hand column inside its own apps.
+Spotify only offers the features in the right-hand column inside its own apps.
 
 ## Hardware
 
 | Part | Notes |
 |---|---|
-| ESP32 dev board | Must be an original ESP32. The S3, C3 and C6 have no Bluetooth Classic, so they can't send audio to earbuds. A **WROVER** module (with PSRAM) is needed for Spotify streaming. |
+| ESP32 dev board | Must be an original ESP32. The S3, C3 and C6 have no Bluetooth Classic, so they can't send audio to earbuds. Spotify streaming needs a **WROVER** module (with PSRAM). |
 | ILI9341 TFT, 2.4" or 2.8" | SPI, 240 × 320 |
 | 7 tactile buttons | Up, down, select, previous, play/pause, next, like |
-| Bluetooth earbuds | Any A2DP earbuds. Developed against Realme Buds. |
-| Spotify Premium | Required for Spotify Connect playback |
+| Bluetooth earbuds | Any A2DP earbuds work. Developed against Realme Buds. |
+| Spotify Premium | Spotify Connect playback requires it |
 
 <details>
 <summary>Does my board have PSRAM?</summary>
@@ -69,7 +94,7 @@ void setup() {
 void loop() {}
 ```
 
-`PSRAM: 0 bytes` means there isn't any.
+`PSRAM: 0 bytes` means the board has none.
 </details>
 
 ## Wiring
@@ -97,18 +122,9 @@ Each button's other leg goes to GND. The firmware uses the internal pull-ups.
 The pins avoid GPIO 6–11 (flash), 16/17 (PSRAM on WROVER), 12 (boot strapping)
 and 34–39 (input-only, no pull-ups), so the same wiring works on WROOM and WROVER.
 
-## Try it in the simulator
+## Controls
 
-No hardware needed. [`sim/sketch/`](sim/sketch) is a [Wokwi](https://wokwi.com)
-project with everything above wired up. Wokwi can't simulate Bluetooth audio or
-Spotify, so the songs are sample data and playback is a timer.
-
-1. Open <https://wokwi.com/projects/new/esp32>.
-2. Replace `sketch.ino` and `diagram.json` with the files from `sim/sketch/`.
-3. Add a `libraries.txt` file with the same contents as the one here.
-4. Press play.
-
-The buttons sit in a cross, with PLAY in the middle:
+The buttons sit in a cross with PLAY in the middle:
 
 ```
            [ UP ]
@@ -123,6 +139,18 @@ The buttons sit in a cross, with PLAY in the middle:
 | PLAY | Play / pause | Play / pause |
 | PREV, NEXT | Previous / next track | Previous / next track |
 | LIKE | Like the current track | Like the current track |
+
+PREV restarts the current song if it is more than 3 seconds in, the same way
+Spotify does.
+
+## Project layout
+
+```
+sim/sketch/
+├── sketch.ino      UI, input handling and fake playback
+├── diagram.json    Wokwi wiring for the board, screen and buttons
+└── libraries.txt   Arduino libraries Wokwi installs (Adafruit GFX, ILI9341)
+```
 
 ## Roadmap
 
